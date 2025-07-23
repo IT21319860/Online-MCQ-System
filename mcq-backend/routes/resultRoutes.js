@@ -11,15 +11,25 @@ router.post('/submit', async (req, res) => {
   let score = 0;
   const result = await Result.create({ user_id, exam_id, score: 0 });
 
+  const detailedAnswers = [];
+
   for (let ans of answers) {
     const question = await Question.findById(ans.question_id);
     const isCorrect = question.correct_option === ans.selected_option;
     if (isCorrect) score++;
 
-    await Answer.create({
+    const answerDoc = await Answer.create({
       result_id: result._id,
       question_id: question._id,
       selected_option: ans.selected_option,
+      is_correct: isCorrect,
+    });
+
+    detailedAnswers.push({
+      question_text: question.question_text,
+      options: question.options,
+      selected_option: ans.selected_option,
+      correct_option: question.correct_option,
       is_correct: isCorrect,
     });
   }
@@ -27,7 +37,7 @@ router.post('/submit', async (req, res) => {
   result.score = score;
   await result.save();
 
-  res.json({ result_id: result._id, score });
+  res.json({ score, answers: detailedAnswers });
 });
 
 // View result details

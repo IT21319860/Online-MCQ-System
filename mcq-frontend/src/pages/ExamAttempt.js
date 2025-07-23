@@ -30,6 +30,7 @@ function ExamAttempt() {
     };
     const res = await axios.post("http://localhost:5000/api/results/submit", payload);
     localStorage.setItem("lastScore", res.data.score);
+    localStorage.setItem("lastResult", JSON.stringify(res.data));
     navigate("/results");
   };
 
